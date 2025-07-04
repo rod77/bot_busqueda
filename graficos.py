@@ -85,31 +85,31 @@ def agregar_grafico(ws_destino, fila_inicio, filas_datos, titulo, celda):
 
 def generar_tabla_y_grafico(path_excel: Path):
     wb = load_workbook(path_excel)
-    ws_papers = wb["Papers"]
+    we_resumen = wb["Resumen"]
 
     ws_graficos = crear_hoja_graficos(wb)
 
     # === AÑOS ===
-    anios = obtener_valores(ws_papers, fila=5)
+    anios = obtener_valores(we_resumen, fila=5)
     total_anios = len(anios)
     conteo_anios = Counter(map(int, anios))
     conteo_anios = dict(sorted(conteo_anios.items(), reverse=True))
 
     fila_actual = 1
-    escribir_titulo(ws_graficos, fila_actual, "PAPERS POR AÑO")
+    escribir_titulo(ws_graficos, fila_actual, "ARTíCULOS POR AÑO")
     fila_actual += 1
 
     fila_fin_anios = escribir_tabla(ws_graficos, conteo_anios, total_anios,
                                     fila_inicio=fila_actual, titulo_col1="Año")
     agregar_grafico(ws_graficos, fila_actual, len(conteo_anios),
-                    "Cantidad de Papers por Año", "E2")
+                    "Cantidad de artículos por Año", "E2")
 
     # === PAISES ===
     fila_actual = fila_fin_anios + 20  # más espacio entre tablas
-    escribir_titulo(ws_graficos, fila_actual, "PAPERS POR PAÍS")
+    escribir_titulo(ws_graficos, fila_actual, "ARTíCULOS POR PAÍS")
     fila_actual += 1
 
-    paises = obtener_valores(ws_papers, fila=9)
+    paises = obtener_valores(we_resumen, fila=9)
     total_paises = len(paises)
     conteo_paises = Counter(paises)
     conteo_paises = dict(sorted(conteo_paises.items(), key=lambda x: x[1], reverse=True))
@@ -117,7 +117,7 @@ def generar_tabla_y_grafico(path_excel: Path):
     fila_fin_paises = escribir_tabla(ws_graficos, conteo_paises, total_paises,
                                      fila_inicio=fila_actual, titulo_col1="País")
     agregar_grafico(ws_graficos, fila_actual, len(conteo_paises),
-                    "Cantidad de Papers por País", f"E{fila_actual}")
+                    "Cantidad de artículos por País", f"E{fila_actual}")
 
     wb.save(path_excel)
     print(f"->Graficos generados")

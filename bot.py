@@ -83,7 +83,7 @@ if __name__ == "__main__":
         copiar_excel(ORIGINAL_XLSX, COPIA_XLSX)
         wb = load_workbook(COPIA_XLSX)
         print("Creando Excel")
-    ws = wb["Papers"]
+    ws = wb["Resumen"]
 
     urls_existentes = obtener_urls_existentes(ws)
     driver = inicializar_driver()
