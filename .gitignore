@@ -1,0 +1,36 @@
+# Carpetas típicas a ignorar
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entorno virtual
+venv/
+.env/
+.venv/
+
+# Archivos temporales
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de Excel temporales
+~$*
+
+# Configuración IDE (si usás VSCode, PyCharm, etc.)
+.vscode/
+.idea/
+
+# Archivos de control de Selenium (si dejás logs)
+chromedriver.log
+
+# Otros
+*.egg-info/
+dist/
+build/
