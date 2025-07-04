@@ -10,7 +10,7 @@ import shutil
 
 # 📄 CONFIG
 ORIGINAL_XLSX = Path("ExcelModelo/ExcelModelo.xlsx")
-COPIA_XLSX = Path("ExcelModelo_Copia.xlsx")
+COPIA_XLSX = Path("Resumen.xlsx")
 URLS = [
     "https://ieeexplore.ieee.org/document/10937826",
     'https://ieeexplore.ieee.org/document/4053283',

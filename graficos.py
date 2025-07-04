@@ -124,4 +124,4 @@ def generar_tabla_y_grafico(path_excel: Path):
 
 
 if __name__ == "__main__":
-    generar_tabla_y_grafico(Path("ExcelModelo_Copia.xlsx"))
+    generar_tabla_y_grafico(Path("Resumen.xlsx"))
