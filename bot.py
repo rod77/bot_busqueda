@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 from pathlib import Path
 import shutil
 
-# 📄 CONFIG
+#
 ORIGINAL_XLSX = Path("ExcelModelo/ExcelModelo.xlsx")
 COPIA_XLSX = Path("Resumen.xlsx")
 URLS = [
