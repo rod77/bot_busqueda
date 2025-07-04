@@ -96,7 +96,7 @@ def generar_tabla_y_grafico(path_excel: Path):
     conteo_anios = dict(sorted(conteo_anios.items(), reverse=True))
 
     fila_actual = 1
-    escribir_titulo(ws_graficos, fila_actual, "ARTíCULOS POR AÑO")
+    escribir_titulo(ws_graficos, fila_actual, "ARTÍCULOS POR AÑO")
     fila_actual += 1
 
     fila_fin_anios = escribir_tabla(ws_graficos, conteo_anios, total_anios,
@@ -106,7 +106,7 @@ def generar_tabla_y_grafico(path_excel: Path):
 
     # === PAISES ===
     fila_actual = fila_fin_anios + 20  # más espacio entre tablas
-    escribir_titulo(ws_graficos, fila_actual, "ARTíCULOS POR PAÍS")
+    escribir_titulo(ws_graficos, fila_actual, "ARTÍCULOS POR PAÍS")
     fila_actual += 1
 
     paises = obtener_valores(we_resumen, fila=9)

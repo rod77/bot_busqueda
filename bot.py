@@ -21,7 +21,9 @@ URLS = [
     'https://ieeexplore.ieee.org/document/10121659',
     'https://ieeexplore.ieee.org/document/9006200',
     'https://ieeexplore.ieee.org/document/10158172',
-    'https://ieeexplore.ieee.org/document/10423308'
+    'https://ieeexplore.ieee.org/document/10423308',
+    'https://ieeexplore.ieee.org/document/9842688',
+    'https://ieeexplore.ieee.org/document/9006051'
 ]
 
 #Funciones de IEEE
