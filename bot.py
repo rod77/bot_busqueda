@@ -12,20 +12,6 @@ import shutil
 ORIGINAL_XLSX = Path("ExcelModelo/ExcelModelo.xlsx")
 COPIA_XLSX = Path("Resumen.xlsx")
 EXCEL_URLS = Path("ListadoArticulos.xlsx")
-# URLS = [
-#     "https://ieeexplore.ieee.org/document/10937826",
-#     'https://ieeexplore.ieee.org/document/4053283',
-#     "https://ieeexplore.ieee.org/document/10993799",
-#     "https://ieeexplore.ieee.org/document/8397647",
-#     'https://ieeexplore.ieee.org/document/6493605',
-#     'https://ieeexplore.ieee.org/document/10270721',
-#     'https://ieeexplore.ieee.org/document/10121659',
-#     'https://ieeexplore.ieee.org/document/9006200',
-#     'https://ieeexplore.ieee.org/document/10158172',
-#     'https://ieeexplore.ieee.org/document/10423308',
-#     'https://ieeexplore.ieee.org/document/9842688',
-#     'https://ieeexplore.ieee.org/document/9006051'
-# ]
 
 #Funciones de IEEE
 from FN_IEEE import (
@@ -33,6 +19,22 @@ from FN_IEEE import (
     obtener_cita_ieee,
     obtener_location_ieee,
     obtener_metricas_ieee
+)
+
+#Funciones de SPRINGER
+from FN_SPRINGER import (
+    obtener_titulo_springer,
+    obtener_cita_springer,
+    obtener_location_springer,
+    obtener_metricas_springer
+)
+
+#Funciones de ACM
+from FN_ACM import (
+    obtener_titulo_acm,
+    obtener_cita_acm,
+    obtener_location_acm,
+    obtener_metricas_acm
 )
 
 #Leo desde un archivo
