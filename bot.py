@@ -11,20 +11,21 @@ import shutil
 #
 ORIGINAL_XLSX = Path("ExcelModelo/ExcelModelo.xlsx")
 COPIA_XLSX = Path("Resumen.xlsx")
-URLS = [
-    "https://ieeexplore.ieee.org/document/10937826",
-    'https://ieeexplore.ieee.org/document/4053283',
-    "https://ieeexplore.ieee.org/document/10993799",
-    "https://ieeexplore.ieee.org/document/8397647",
-    'https://ieeexplore.ieee.org/document/6493605',
-    'https://ieeexplore.ieee.org/document/10270721',
-    'https://ieeexplore.ieee.org/document/10121659',
-    'https://ieeexplore.ieee.org/document/9006200',
-    'https://ieeexplore.ieee.org/document/10158172',
-    'https://ieeexplore.ieee.org/document/10423308',
-    'https://ieeexplore.ieee.org/document/9842688',
-    'https://ieeexplore.ieee.org/document/9006051'
-]
+EXCEL_URLS = Path("ListadoArticulos.xlsx")
+# URLS = [
+#     "https://ieeexplore.ieee.org/document/10937826",
+#     'https://ieeexplore.ieee.org/document/4053283',
+#     "https://ieeexplore.ieee.org/document/10993799",
+#     "https://ieeexplore.ieee.org/document/8397647",
+#     'https://ieeexplore.ieee.org/document/6493605',
+#     'https://ieeexplore.ieee.org/document/10270721',
+#     'https://ieeexplore.ieee.org/document/10121659',
+#     'https://ieeexplore.ieee.org/document/9006200',
+#     'https://ieeexplore.ieee.org/document/10158172',
+#     'https://ieeexplore.ieee.org/document/10423308',
+#     'https://ieeexplore.ieee.org/document/9842688',
+#     'https://ieeexplore.ieee.org/document/9006051'
+# ]
 
 #Funciones de IEEE
 from FN_IEEE import (
@@ -33,6 +34,20 @@ from FN_IEEE import (
     obtener_location_ieee,
     obtener_metricas_ieee
 )
+
+#Leo desde un archivo
+def leer_urls_desde_excel(ruta_excel: Path) -> list[str]:
+    wb = load_workbook(ruta_excel)
+    ws = wb.active
+    urls = []
+
+    # Suponemos que el título está en A1 y los datos arrancan desde A2
+    for row in ws.iter_rows(min_row=2, max_col=1, values_only=True):
+        link = row[0]
+        if link and isinstance(link, str):
+            urls.append(link.strip())
+
+    return urls
 
 #Funciones Utiles
 def copiar_excel(origen: Path, destino: Path):
@@ -77,6 +92,8 @@ def escribir_articulo_en_excel(ws, col, articulo):
 
 # Main:
 if __name__ == "__main__":
+    #Tomo links del excel:
+    URLS = leer_urls_desde_excel(EXCEL_URLS)
     # abrir/crear Excel
     if COPIA_XLSX.exists():
         wb = load_workbook(COPIA_XLSX)
