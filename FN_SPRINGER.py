@@ -4,49 +4,49 @@ from selenium.webdriver.support import expected_conditions as EC
 import re
 
 #XPATHS
-XPATH_IEEE_TITLE = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/h1/span'
-XPATH_IEEE_CITA_BTN = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/div/div[2]/xpl-cite-this-modal/div/button'
-XPATH_IEEE_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
-XPATH_IEEE_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
-XPATH_IEEE_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
-XPATH_IEEE_MODAL_CLOSE = '/html/body/ngb-modal-window/div/div/div/div[3]/button/i'
-XPATH_IEEE_LOCATION = '//div[contains(@class, "doc-abstract-conferenceLoc")]'
+XPATH_SPRINGER_TITLE = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/h1/span'
+XPATH_SPRINGER_CITA_BTN = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/div/div[2]/xpl-cite-this-modal/div/button'
+XPATH_SPRINGER_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
+XPATH_SPRINGER_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
+XPATH_SPRINGER_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
+XPATH_SPRINGER_MODAL_CLOSE = '/html/body/ngb-modal-window/div/div/div/div[3]/button/i'
+XPATH_SPRINGER_LOCATION = '//div[contains(@class, "doc-abstract-conferenceLoc")]'
 
 #funciones:
-def obtener_titulo_ieee(driver, url):
+def obtener_titulo_springer(driver, url):
     driver.get(url)
     wait = WebDriverWait(driver, 15)
     titulo_elem = wait.until(
-        EC.presence_of_element_located((By.XPATH, XPATH_IEEE_TITLE))
+        EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_TITLE))
     )
     return titulo_elem.text.strip()
 
 
-def obtener_cita_ieee(driver):
+def obtener_cita_springer(driver):
     wait = WebDriverWait(driver, 15)
 
     btn_citar = wait.until(
-        EC.element_to_be_clickable((By.XPATH, XPATH_IEEE_CITA_BTN))
+        EC.element_to_be_clickable((By.XPATH, XPATH_SPRINGER_CITA_BTN))
     )
     
     btn_citar.click()
 
     cita_texto = wait.until(
-        EC.presence_of_element_located((By.XPATH, XPATH_IEEE_CITA_TXT))
+        EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_CITA_TXT))
     )
     cita = cita_texto.text.strip()
 
     btn_bibtex = wait.until(
-        EC.element_to_be_clickable((By.XPATH, XPATH_IEEE_CITA_BIBTEX_BTN))
+        EC.element_to_be_clickable((By.XPATH, XPATH_SPRINGER_CITA_BIBTEX_BTN))
     )
     btn_bibtex.click()
 
     bibtex_texto = wait.until(
-        EC.presence_of_element_located((By.XPATH, XPATH_IEEE_CITA_BIBTEX_TXT))
+        EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_CITA_BIBTEX_TXT))
     )
     bibtex = bibtex_texto.text.strip()
 
-    driver.find_element(By.XPATH, XPATH_IEEE_MODAL_CLOSE).click()
+    driver.find_element(By.XPATH, XPATH_SPRINGER_MODAL_CLOSE).click()
 
     parsed = parsear_bibtex(bibtex)
 
@@ -67,7 +67,7 @@ def parsear_bibtex(bibtex):
         resultado[clave.strip()] = valor.strip().rstrip("},")
     return resultado
 
-def obtener_location_ieee(driver):
+def obtener_location_springer(driver):
     wait = WebDriverWait(driver, 15)
 
     try:
@@ -93,7 +93,7 @@ def obtener_location_ieee(driver):
         return "No Disponible"
 
 
-def obtener_metricas_ieee(driver):
+def obtener_metricas_springer(driver):
     wait = WebDriverWait(driver, 10)
 
     cites_in = 0
