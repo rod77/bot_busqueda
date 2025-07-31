@@ -6,36 +6,38 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from openpyxl import load_workbook
 from pathlib import Path
+from urllib.parse import urlparse
 import shutil
+from FN_IEEE import obtener_titulo_ieee, obtener_location_ieee, obtener_metricas_ieee, obtener_cita_ieee
+from FN_SPRINGER import obtener_titulo_springer, obtener_location_springer, obtener_metricas_springer, obtener_cita_springer
+from FN_ACM import obtener_titulo_acm, obtener_location_acm, obtener_metricas_acm, obtener_cita_acm
 
 #
 ORIGINAL_XLSX = Path("ExcelModelo/ExcelModelo.xlsx")
 COPIA_XLSX = Path("Resumen.xlsx")
 EXCEL_URLS = Path("ListadoArticulos.xlsx")
 
-#Funciones de IEEE
-from FN_IEEE import (
-    obtener_titulo_ieee,
-    obtener_cita_ieee,
-    obtener_location_ieee,
-    obtener_metricas_ieee
-)
-
-#Funciones de SPRINGER
-from FN_SPRINGER import (
-    obtener_titulo_springer,
-    obtener_cita_springer,
-    obtener_location_springer,
-    obtener_metricas_springer
-)
-
-#Funciones de ACM
-from FN_ACM import (
-    obtener_titulo_acm,
-    obtener_cita_acm,
-    obtener_location_acm,
-    obtener_metricas_acm
-)
+# Mapeo las funciones según el origen de la URL
+EXTRACTORES = {
+    "ieeexplore.ieee.org": {
+        "titulo": obtener_titulo_ieee,
+        "ubicacion": obtener_location_ieee,
+        "metricas": obtener_metricas_ieee,
+        "cita": obtener_cita_ieee
+    },
+    "link.springer.com": {
+        "titulo": obtener_titulo_springer,
+        "ubicacion": obtener_location_springer,
+        "metricas": obtener_metricas_springer,
+        "cita": obtener_cita_springer
+    },
+    "dl.acm.org": {
+        "titulo": obtener_titulo_acm,
+        "ubicacion": obtener_location_acm,
+        "metricas": obtener_metricas_acm,
+        "cita": obtener_cita_acm
+    }
+}
 
 #Leo desde un archivo
 def leer_urls_desde_excel(ruta_excel: Path) -> list[str]:
@@ -116,10 +118,17 @@ if __name__ == "__main__":
 
         print(f"Procesando: {url}")
 
-        titulo = obtener_titulo_ieee(driver, url)
-        ubicacion = obtener_location_ieee(driver)
-        cites_in, text_views = obtener_metricas_ieee(driver)
-        datos_cita = obtener_cita_ieee(driver)
+        dominio = urlparse(url).netloc
+        extractor = EXTRACTORES.get(dominio)
+
+        if extractor is None:
+            print(f"!!-> No hay extractor definido para {dominio}")
+            continue
+
+        titulo = extractor["titulo"](driver, url)
+        ubicacion = extractor["ubicacion"](driver)
+        cites_in, text_views = extractor["metricas"](driver)
+        datos_cita = extractor["cita"](driver)
 
         col_libre = encontrar_columna_libre(ws)
         articulo = {
