@@ -62,7 +62,8 @@ def obtener_cita_springer(driver):
     if doi_text.startswith("https://doi.org/"):
         doi_text=doi_text.replace("https://doi.org/", "")
     print("-->doi_text:",doi_text)
-    keyword_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, XPATH_SPRINGER_KEYWORDS_TXT)))
+    #keyword_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, XPATH_SPRINGER_KEYWORDS_TXT)))
+    keyword_elements = driver.find_elements(By.XPATH, XPATH_SPRINGER_KEYWORDS_TXT)
     keywords = [elem.text.strip() for elem in keyword_elements if elem.text.strip()]
     print("--->keywords:",keywords)
 
@@ -70,7 +71,7 @@ def obtener_cita_springer(driver):
         "cita": cita_txt,
         "author": autores_txt,
         "booktitle": booktitle_txt.text,
-        "year": datetime_val[:4],
+        "year": datetime_val,
         "keywords": ", ".join(keywords),
         "doi": doi_text
     }
