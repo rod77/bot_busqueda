@@ -61,6 +61,8 @@ def copiar_excel(origen: Path, destino: Path):
 def inicializar_driver():
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
+    # 🔇 Desactiva los logs molestos
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
     service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
@@ -120,15 +122,22 @@ if __name__ == "__main__":
 
         dominio = urlparse(url).netloc
         extractor = EXTRACTORES.get(dominio)
-
+        if "ieee" in dominio:
+            fuente = "IEEE"
+        elif "springer" in dominio:
+            fuente = "Springer"
+        elif "acm" in dominio:
+            fuente = "ACM"
+        else:
+            fuente = "Desconocida"
         if extractor is None:
             print(f"!!-> No hay extractor definido para {dominio}")
             continue
 
         titulo = extractor["titulo"](driver, url)
+        datos_cita = extractor["cita"](driver)
         ubicacion = extractor["ubicacion"](driver)
         cites_in, text_views = extractor["metricas"](driver)
-        datos_cita = extractor["cita"](driver)
 
         col_libre = encontrar_columna_libre(ws)
         articulo = {
@@ -141,7 +150,7 @@ if __name__ == "__main__":
             "year": int(datos_cita["year"]) if str(datos_cita["year"]).isdigit() else 0,
             "keywords": datos_cita["keywords"],
             "doi": datos_cita["doi"],
-            "fuente": "IEEE",
+            "fuente": fuente,
             "ubicacion": ubicacion,
             "cites_in": cites_in,
             "text_views": text_views

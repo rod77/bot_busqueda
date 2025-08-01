@@ -4,59 +4,75 @@ from selenium.webdriver.support import expected_conditions as EC
 import re
 
 #XPATHS
-XPATH_SPRINGER_TITLE = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/h1/span'
-XPATH_SPRINGER_CITA_BTN = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/div/div[2]/xpl-cite-this-modal/div/button'
-XPATH_SPRINGER_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
-XPATH_SPRINGER_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
-XPATH_SPRINGER_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
-XPATH_SPRINGER_MODAL_CLOSE = '/html/body/ngb-modal-window/div/div/div/div[3]/button/i'
-XPATH_SPRINGER_LOCATION = '//div[contains(@class, "doc-abstract-conferenceLoc")]'
+XPATH_SPRINGER_BTN_COOKIES = '/html/body/dialog/div/div/div[3]/button'
+XPATH_SPRINGER_TITLE = '//*[@id="main"]/section/div/div/div[1]/h1'
+XPATH_SPRINGER_CITA_TXT = '//p[contains(@class, "c-bibliographic-information__citation")]'
+XPATH_SPRINGER_AUTORES_TXT = '//ul[@data-test="authors-list"]//a[@data-test="author-name"]'
+XPATH_SPRINGER_BOOKTITLE_TXT = '//span[contains(@class, "app-article-masthead__journal-title")]'
+XPATH_SPRINGER_YEAR_TXT = '//li[@class="c-bibliographic-information__list-item"]//time'
+XPATH_SPRINGER_DOI_TXT = '//p[abbr[@title="Digital Object Identifier"]]/span[@class="c-bibliographic-information__value"]'
+XPATH_SPRINGER_KEYWORDS_TXT = '//ul[@class="c-article-subject-list"]//li//a'
+XPATH_SPRINGER_METRICS = '//ul[contains(@class, "app-article-metrics-bar")]/li'
 
 #funciones:
 def obtener_titulo_springer(driver, url):
     driver.get(url)
-    wait = WebDriverWait(driver, 15)
+    wait = WebDriverWait(driver, 5)
+    # Intentar cerrar el diálogo de cookies si aparece
+    try:
+        btn_cookies = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, XPATH_SPRINGER_BTN_COOKIES))
+        )
+        btn_cookies.click()
+    except Exception:
+        pass  # No apareció el botón, continuar
     titulo_elem = wait.until(
         EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_TITLE))
     )
+    print("--->titulo_elem:",titulo_elem.text)
     return titulo_elem.text.strip()
 
 
 def obtener_cita_springer(driver):
-    wait = WebDriverWait(driver, 15)
-
-    btn_citar = wait.until(
-        EC.element_to_be_clickable((By.XPATH, XPATH_SPRINGER_CITA_BTN))
-    )
-    
-    btn_citar.click()
-
-    cita_texto = wait.until(
+    #Para que quede parecido  "IEEE" se busca varios campos
+    wait = WebDriverWait(driver, 5)
+    cita_txt_elem = wait.until(
         EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_CITA_TXT))
     )
-    cita = cita_texto.text.strip()
-
-    btn_bibtex = wait.until(
-        EC.element_to_be_clickable((By.XPATH, XPATH_SPRINGER_CITA_BIBTEX_BTN))
+    cita_txt = cita_txt_elem.text.strip()
+    print("--->cita_txt:",cita_txt)
+    autores_txt = wait.until(
+        EC.presence_of_all_elements_located((By.XPATH, XPATH_SPRINGER_AUTORES_TXT))
     )
-    btn_bibtex.click()
+    autores_txt = ", ".join([autor.text.strip() for autor in autores_txt])
+    print("--->autores_txt:",autores_txt)
 
-    bibtex_texto = wait.until(
-        EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_CITA_BIBTEX_TXT))
+    booktitle_txt = wait.until(
+        EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_BOOKTITLE_TXT))
     )
-    bibtex = bibtex_texto.text.strip()
+    print("-->booktitle_txt:",booktitle_txt.text)
 
-    driver.find_element(By.XPATH, XPATH_SPRINGER_MODAL_CLOSE).click()
+    time_elem = wait.until(EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_YEAR_TXT))          )
+    datetime_val = time_elem.get_attribute("datetime")
+    datetime_val = datetime_val[:4]
+    print("--->2datetime_val:",datetime_val)
 
-    parsed = parsear_bibtex(bibtex)
+    doi_elem = wait.until(EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_DOI_TXT)))
+    doi_text = doi_elem.text.strip()
+    if doi_text.startswith("https://doi.org/"):
+        doi_text=doi_text.replace("https://doi.org/", "")
+    print("-->doi_text:",doi_text)
+    keyword_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, XPATH_SPRINGER_KEYWORDS_TXT)))
+    keywords = [elem.text.strip() for elem in keyword_elements if elem.text.strip()]
+    print("--->keywords:",keywords)
 
     return {
-        "cita": cita,
-        "author": parsed.get("author", ""),
-        "booktitle": parsed.get("booktitle", ""),
-        "year": int(parsed.get("year", "0")) if parsed.get("year", "0").isdigit() else 0,
-        "keywords": parsed.get("keywords", ""),
-        "doi": parsed.get("doi", "")
+        "cita": cita_txt,
+        "author": autores_txt,
+        "booktitle": booktitle_txt.text,
+        "year": datetime_val[:4],
+        "keywords": ", ".join(keywords),
+        "doi": doi_text
     }
 
 
@@ -68,62 +84,30 @@ def parsear_bibtex(bibtex):
     return resultado
 
 def obtener_location_springer(driver):
-    wait = WebDriverWait(driver, 15)
-
-    try:
-        loc_elemento = wait.until(
-            EC.presence_of_element_located(
-                (By.XPATH, XPATH_IEEE_LOCATION)
-            )
-        )
-        texto = loc_elemento.text.strip()
-        # quito prefijo
-        if texto.startswith("Conference Location:"):
-            texto = texto.replace("Conference Location:", "", 1).strip()
-
-        # Me quedo con el pais
-        if "," in texto:
-            ubicacion = texto.split(",")[-1].strip()
-        else:
-            ubicacion = texto
-
-        return ubicacion
-
-    except Exception as e:
+        #En springer no aparece la locación en ningun lado.
         return "No Disponible"
 
 
 def obtener_metricas_springer(driver):
     wait = WebDriverWait(driver, 10)
-
     cites_in = 0
     text_views = 0
 
     try:
-        botones = wait.until(
+        metricas = wait.until(
             EC.presence_of_all_elements_located(
-                (By.XPATH, "//button[contains(@class, 'document-banner-metric')]")
+                (By.XPATH, XPATH_SPRINGER_METRICS)
             )
         )
+       
+        for metrica in metricas:
+            texto = metrica.text.strip()
+            if "Accesses" in texto:
+                text_views = int(texto.split()[0].replace(",", ""))
+            elif "Citation" in texto or "Citations" in texto:
+                cites_in = int(texto.split()[0].replace(",", ""))
 
-        for btn in botones:
-            texto = btn.text.strip()
-
-            try:
-                numero_txt = btn.find_element(
-                    By.XPATH, ".//div[contains(@class,'document-banner-metric-count')]"
-                ).text.strip()
-                numero = int(numero_txt.replace(",", ""))
-            except:
-                numero = 0
-
-            if "Cites in" in texto:
-                cites_in = numero
-            elif "Text Views" in texto:
-                text_views = numero
-
-    except Exception as e:
-        #print(f"⚠️ No se encontraron métricas: {e}")
-        pass
+    except Exception:
+        pass  # si no hay métricas, se devuelven los ceros
 
     return cites_in, text_views
