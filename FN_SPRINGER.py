@@ -40,32 +40,33 @@ def obtener_cita_springer(driver):
         EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_CITA_TXT))
     )
     cita_txt = cita_txt_elem.text.strip()
-    print("--->cita_txt:",cita_txt)
+    
     autores_txt = wait.until(
         EC.presence_of_all_elements_located((By.XPATH, XPATH_SPRINGER_AUTORES_TXT))
     )
     autores_txt = ", ".join([autor.text.strip() for autor in autores_txt])
-    print("--->autores_txt:",autores_txt)
 
     booktitle_txt = wait.until(
         EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_BOOKTITLE_TXT))
     )
-    print("-->booktitle_txt:",booktitle_txt.text)
 
     time_elem = wait.until(EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_YEAR_TXT))          )
     datetime_val = time_elem.get_attribute("datetime")
     datetime_val = datetime_val[:4]
-    print("--->2datetime_val:",datetime_val)
 
     doi_elem = wait.until(EC.presence_of_element_located((By.XPATH, XPATH_SPRINGER_DOI_TXT)))
     doi_text = doi_elem.text.strip()
     if doi_text.startswith("https://doi.org/"):
         doi_text=doi_text.replace("https://doi.org/", "")
-    print("-->doi_text:",doi_text)
-    #keyword_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, XPATH_SPRINGER_KEYWORDS_TXT)))
+    
     keyword_elements = driver.find_elements(By.XPATH, XPATH_SPRINGER_KEYWORDS_TXT)
     keywords = [elem.text.strip() for elem in keyword_elements if elem.text.strip()]
-    print("--->keywords:",keywords)
+    # print("-->cita_txt:",cita_txt)
+    # print("-->autores_txt:",autores_txt)
+    # print("-->booktitle_txt:",booktitle_txt.text)
+    # print("-->2datetime_val:",datetime_val)
+    # print("-->doi_text:",doi_text)
+    # print("-->keywords:",keywords)
 
     return {
         "cita": cita_txt,

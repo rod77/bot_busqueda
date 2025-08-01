@@ -1,74 +1,80 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import re
+import time
 
 #XPATHS
-XPATH_ACM_TITLE = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/h1/span'
-XPATH_ACM_CITA_BTN = '//*[@id="xplMainContentLandmark"]/div/xpl-document-details/div/div[1]/section[2]/div/xpl-document-header/section/div[2]/div/div/div[1]/div/div[1]/div/div[2]/xpl-cite-this-modal/div/button'
-XPATH_ACM_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
-XPATH_ACM_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
-XPATH_ACM_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
-XPATH_ACM_MODAL_CLOSE = '/html/body/ngb-modal-window/div/div/div/div[3]/button/i'
+XPATH_ACM_TITLE = '//*[@id="skip-to-main-content"]/main/article/header/div/h1'
+XPATH_ACM_CITA_BTN = '//*[@id="skip-to-main-content"]/main/article/header/div/div[7]/div[2]/div[3]/button'
+#XPATH_ACM_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
+#XPATH_ACM_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
+#XPATH_ACM_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
+#XPATH_ACM_MODAL_CLOSE = '/html/body/ngb-modal-window/div/div/div/div[3]/button/i'
 XPATH_ACM_LOCATION = '//div[contains(@class, "doc-abstract-conferenceLoc")]'
 
 #funciones:
 def obtener_titulo_acm(driver, url):
     driver.get(url)
-    wait = WebDriverWait(driver, 15)
+    wait = WebDriverWait(driver, 5)
+
+# Intentar aceptar cookies si el botón aparece
+    try:
+        boton_cookies = wait.until(
+            EC.element_to_be_clickable((By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll"))
+        )
+        boton_cookies.click()
+    except (TimeoutException, NoSuchElementException):
+        print("")
+
+
     titulo_elem = wait.until(
         EC.presence_of_element_located((By.XPATH, XPATH_ACM_TITLE))
     )
+    print("-->Title ACM:",titulo_elem.text)
     return titulo_elem.text.strip()
 
 
 def obtener_cita_acm(driver):
     wait = WebDriverWait(driver, 15)
 
-    btn_citar = wait.until(
-        EC.element_to_be_clickable((By.XPATH, XPATH_ACM_CITA_BTN))
-    )
-    
-    btn_citar.click()
+    # Hacer click en el boton de export citation
+    time.sleep(5)
+    boton_cita = wait.until(EC.element_to_be_clickable((By.XPATH, XPATH_ACM_CITA_BTN)))
+    boton_cita.click()
+    time.sleep(5)
+    # Esperar a que cargue el modal con la cita en formato bibtex
+    cita_elem = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "csl-right-inline")))
+    cita_texto = cita_elem.text.strip()
 
-    cita_texto = wait.until(
-        EC.presence_of_element_located((By.XPATH, XPATH_ACM_CITA_TXT))
-    )
-    cita = cita_texto.text.strip()
+    author_raw = extraer_valor_bibtex(cita_texto, "author")
+    author = author_raw.replace(",", "")
 
-    btn_bibtex = wait.until(
-        EC.element_to_be_clickable((By.XPATH, XPATH_ACM_CITA_BIBTEX_BTN))
-    )
-    btn_bibtex.click()
-
-    bibtex_texto = wait.until(
-        EC.presence_of_element_located((By.XPATH, XPATH_ACM_CITA_BIBTEX_TXT))
-    )
-    bibtex = bibtex_texto.text.strip()
-
-    driver.find_element(By.XPATH, XPATH_ACM_MODAL_CLOSE).click()
-
-    parsed = parsear_bibtex(bibtex)
+    print("cita",cita_texto)
+    print("author",author)
+    print("booktitle",extraer_valor_bibtex(cita_texto, "publisher"))
+    print("year",extraer_valor_bibtex(cita_texto, "year"))
+    print("keywords",extraer_valor_bibtex(cita_texto, "keywords"))
+    print("doi",extraer_valor_bibtex(cita_texto, "doi"))
 
     return {
-        "cita": cita,
-        "author": parsed.get("author", ""),
-        "booktitle": parsed.get("booktitle", ""),
-        "year": int(parsed.get("year", "0")) if parsed.get("year", "0").isdigit() else 0,
-        "keywords": parsed.get("keywords", ""),
-        "doi": parsed.get("doi", "")
+        "cita": cita_texto,
+        "author": author,
+        "booktitle": extraer_valor_bibtex(cita_texto, "publisher"),
+        "year": extraer_valor_bibtex(cita_texto, "year"),
+        "keywords": extraer_valor_bibtex(cita_texto, "keywords"),
+        "doi": extraer_valor_bibtex(cita_texto, "doi"),
     }
 
 
-def parsear_bibtex(bibtex):
-    resultado = {}
-    matches = re.findall(r'(\w+)\s*=\s*[{"](.+?)[}"],?\s*$', bibtex, re.MULTILINE)
-    for clave, valor in matches:
-        resultado[clave.strip()] = valor.strip().rstrip("},")
-    return resultado
+def extraer_valor_bibtex(texto, campo):
+    patron = rf'{campo}\s*=\s*\{{(.*?)\}}'
+    resultado = re.search(patron, texto, re.DOTALL)
+    return resultado.group(1).strip() if resultado else ""
 
 def obtener_location_acm(driver):
-    wait = WebDriverWait(driver, 15)
+    wait = WebDriverWait(driver, 5)
 
     try:
         loc_elemento = wait.until(
