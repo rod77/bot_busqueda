@@ -111,7 +111,6 @@ if __name__ == "__main__":
     ws = wb["Resumen"]
 
     urls_existentes = obtener_urls_existentes(ws)
-    driver = inicializar_driver()
 
     for url in URLS:
         if url in urls_existentes:
@@ -133,7 +132,7 @@ if __name__ == "__main__":
         if extractor is None:
             print(f"!!-> No hay extractor definido para {dominio}")
             continue
-
+        driver = inicializar_driver()
         titulo = extractor["titulo"](driver, url)
         datos_cita = extractor["cita"](driver)
         ubicacion = extractor["ubicacion"](driver)
@@ -158,6 +157,9 @@ if __name__ == "__main__":
 
         escribir_articulo_en_excel(ws, col_libre, articulo)
         wb.save(COPIA_XLSX)
-
-    driver.quit()
+        driver.delete_all_cookies()
+        driver.execute_script("window.localStorage.clear();")
+        driver.execute_script("window.sessionStorage.clear();")
+        driver.quit()        
+    #driver.quit()
     print("Proceso Finalizado.")
