@@ -9,6 +9,7 @@ import time
 XPATH_ACM_TITLE = '//*[@id="skip-to-main-content"]/main/article/header/div/h1'
 XPATH_ACM_CITA_BTN = '//*[@id="skip-to-main-content"]/main/article/header/div/div[7]/div[2]/div[3]/button'
 XPATH_ACM_AUTORES = '//span[@property="author" and @typeof="Person"]'
+XPATH_ACM_ANIO = '//*[@id="skip-to-main-content"]/main/article/header/div/div[5]//span[@class="core-date-published"]'
 #XPATH_ACM_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
 #XPATH_ACM_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
 #XPATH_ACM_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
@@ -59,6 +60,23 @@ def obtener_autores_acm(driver):
 
     return ", ".join(autores_final)
 
+def obtener_anio_acm(driver):
+    try:
+        wait = WebDriverWait(driver, 10)
+        
+        fecha_elem = wait.until(EC.presence_of_element_located((By.XPATH, XPATH_ACM_ANIO)))
+        fecha_texto = fecha_elem.text.strip()
+
+        print("--> Fecha publicada:", fecha_texto)  # Ej: "08 November 2020"
+
+        # Extraer el último token como año
+        anio = int(fecha_texto.strip().split()[-1])
+        return anio
+
+    except Exception as e:
+        print(f"[ERROR] No se pudo obtener el año de publicación: {e}")
+        return 0
+
 def obtener_cita_acm(driver):
     # wait = WebDriverWait(driver, 15)
 
@@ -81,11 +99,12 @@ def obtener_cita_acm(driver):
     # print("keywords",extraer_valor_bibtex(cita_texto, "keywords"))
     # print("doi",extraer_valor_bibtex(cita_texto, "doi"))
     author = obtener_autores_acm(driver)
+    anio = obtener_anio_acm(driver)
     return {
         "cita": "cita_texto",
         "author": author,
         "booktitle":"booktitle",
-        "year": "1234",
+        "year": anio,
         "keywords": "keeey",
         "doi": "doi",
     }
