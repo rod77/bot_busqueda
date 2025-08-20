@@ -77,36 +77,115 @@ def obtener_anio_acm(driver):
         print(f"[ERROR] No se pudo obtener el año de publicación: {e}")
         return 0
 
+def obtener_booktitle_acm(driver):
+    wait = WebDriverWait(driver, 10)
+
+    try:
+        # Paso 1: Hacer clic en "Authors Info & Claims"
+        boton_authors_info = wait.until(
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="skip-to-main-content"]/main/article/header/div/div[3]/a'))
+        )
+        boton_authors_info.click()
+
+        # Paso 2: Hacer clic en "Information"
+        boton_information = wait.until(
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="tab-information-label"]'))
+        )
+        boton_information.click()
+
+        # Paso 3: Buscar sección "Conference"
+        secciones = wait.until(
+            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="tab-information"]/section'))
+        )
+
+        for seccion in secciones:
+            try:
+                h4 = seccion.find_element(By.TAG_NAME, "h4")
+                if h4.text.strip().lower() == "conference":
+                    booktitle_tag = seccion.find_element(By.XPATH, './/div[contains(@class,"core-conference-right")]/a')
+                    texto_conferencia = booktitle_tag.text.strip()
+                    print("--> Booktitle (conferencia):", texto_conferencia)
+                    return texto_conferencia
+            except Exception:
+                continue
+
+        print("[WARN] No se encontró sección de conferencia.")
+        return ""
+
+    except Exception as e:
+        print(f"[ERROR] No se pudo obtener el booktitle: {e}")
+        return ""
+
+def obtener_keyword_acm(driver):
+    wait = WebDriverWait(driver, 10)
+    try:
+        try:
+            # Paso 1: Hacer clic en "Authors Info & Claims"
+            boton_key_info = wait.until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="skip-to-main-content"]/main/article/header/div/div[3]/a'))
+            )
+            boton_key_info.click()
+
+            # Paso 2: Hacer clic en "Information"
+            boton_information = wait.until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="tab-information-label"]'))
+            )
+            boton_information.click()
+        except:
+            pass
+            # Paso 3: Buscar sección "Conference"
+            secciones = wait.until(
+                EC.presence_of_all_elements_located((By.XPATH, '//*[@id="tab-information"]/section'))
+            )
+
+            for seccion in secciones:
+                try:
+                    h4 = seccion.find_element(By.TAG_NAME, "h4")
+                    if h4.text.strip().lower() == "author tags":
+                        key_tags = seccion.find_elements(By.XPATH, './/ol/li/a')
+                        keywords = [k.text.strip() for k in key_tags if k.text.strip()]
+                        texto_keywords = ", ".join(keywords)
+                        print("--> KeyWords ", texto_keywords)
+                        return texto_keywords
+                except Exception:
+                    continue
+
+            print("[WARN] No se encontró sección de conferencia.")
+            return ""
+    except:
+        return "No Disponible"
+
+def obtener_doi_acm(driver):
+    wait = WebDriverWait(driver, 10)
+    try:
+        doi_link = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="skip-to-main-content"]/main/article/header/div/div[4]/div[3]/a')
+            )
+        )
+        href = doi_link.get_attribute("href")
+        doi = href.replace("https://doi.org/", "").strip()
+        print("--> DOI:", doi)
+        return doi
+    except Exception as e:
+        print(f"[ERROR] No se pudo obtener el DOI: {e}")
+        return ""
+
+
 def obtener_cita_acm(driver):
-    # wait = WebDriverWait(driver, 15)
 
-    # # Hacer click en el boton de export citation
-    # time.sleep(5)
-    # boton_cita = wait.until(EC.element_to_be_clickable((By.XPATH, XPATH_ACM_CITA_BTN)))
-    # boton_cita.click()
-    # time.sleep(5)
-    # # Esperar a que cargue el modal con la cita en formato bibtex
-    # cita_elem = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "csl-right-inline")))
-    # cita_texto = cita_elem.text.strip()
-
-    # author_raw = extraer_valor_bibtex(cita_texto, "author")
-    # author = author_raw.replace(",", "")
-
-    # print("cita",cita_texto)
-    # print("author",author)
-    # print("booktitle",extraer_valor_bibtex(cita_texto, "publisher"))
-    # print("year",extraer_valor_bibtex(cita_texto, "year"))
-    # print("keywords",extraer_valor_bibtex(cita_texto, "keywords"))
-    # print("doi",extraer_valor_bibtex(cita_texto, "doi"))
     author = obtener_autores_acm(driver)
     anio = obtener_anio_acm(driver)
+    doi = obtener_doi_acm(driver)
+    booktitle = obtener_booktitle_acm(driver)
+    key = obtener_keyword_acm(driver)
     return {
-        "cita": "cita_texto",
+        "cita": "",
         "author": author,
-        "booktitle":"booktitle",
+        "booktitle":booktitle,
         "year": anio,
-        "keywords": "keeey",
-        "doi": "doi",
+        "keywords": key,
+        "doi": doi ,
     }
 
 
@@ -116,11 +195,83 @@ def extraer_valor_bibtex(texto, campo):
     return resultado.group(1).strip() if resultado else ""
 
 def obtener_location_acm(driver):
-    return "No Disponible"
+    wait = WebDriverWait(driver, 10)
+
+    try:
+        # # Paso 1: Hacer clic en "Authors Info & Claims"
+        try:
+            boton_authors_info = wait.until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="skip-to-main-content"]/main/article/header/div/div[3]/a'))
+            )
+            boton_authors_info.click()
+
+            # Paso 2: Hacer clic en "Information"
+            boton_information = wait.until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="tab-information-label"]'))
+            )
+            boton_information.click()
+        except:
+            pass
+
+        # Paso 3: Buscar sección "Conference"
+        secciones = wait.until(
+            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="tab-information"]/section'))
+        )
+        for seccion in secciones:
+            try:
+                h4 = seccion.find_element(By.TAG_NAME, "h4")
+                if h4.text.strip().lower() == "conference":
+                    country_tag = seccion.find_element(By.XPATH, './/div[contains(@class,"core-conference-map")]')
+                    texto_country = country_tag.text.strip()
+                    if "," in texto_country:
+                        country = texto_country.split(",")[-1].strip()
+                    else:
+                        country = texto_country
+                    print("--> Country:", country)
+                    return country
+            except Exception:
+                continue
+
+        #print("[WARN] No se encontró sección de conferencia.")
+        return "No Disponible"
+
+    except Exception as e:
+        #print(f"[ERROR] No se pudo obtener el booktitle: {e}")
+        return "No Disponible"
 
 
 def obtener_metricas_acm(driver):
-    cites_in = 0
-    text_views = 0
+    wait = WebDriverWait(driver, 10)
+    try:
+        # Esperar al botón de métricas
+        metrics_btn = wait.until(EC.presence_of_element_located(
+            (By.CSS_SELECTOR, ".info-panel__metrics .metrics-toggle")
+        ))
 
-    return cites_in, text_views
+        # Buscar los spans dentro del botón (citations y downloads)
+        spans = metrics_btn.find_elements(By.TAG_NAME, "span")
+
+        cites_in = 0
+        text_views = 0
+
+        for i, span in enumerate(spans):
+            try:
+                text = span.text.strip()
+                if text.isdigit():
+                    num = int(text)
+                    # Heurística: primer número = citas, segundo número = vistas
+                    if cites_in == 0:
+                        cites_in = num
+                    elif text_views == 0:
+                        text_views = num
+            except:
+                continue
+
+        print("--> Citas (citations):", cites_in)
+        print("--> Descargas (downloads):", text_views)
+
+        return cites_in, text_views
+
+    except Exception as e:
+        print(f"[ERROR] No se pudieron obtener las métricas: {e}")
+        return 0, 0

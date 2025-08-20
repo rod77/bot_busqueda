@@ -134,7 +134,7 @@ if __name__ == "__main__":
             continue
         driver = inicializar_driver()
         titulo = extractor["titulo"](driver, url)
-        datos_cita = extractor["cita"](driver)
+        datos_cita = extractor["cita"](driver)        
         ubicacion = extractor["ubicacion"](driver)
         cites_in, text_views = extractor["metricas"](driver)
 
