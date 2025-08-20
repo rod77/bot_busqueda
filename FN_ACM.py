@@ -10,10 +10,6 @@ XPATH_ACM_TITLE = '//*[@id="skip-to-main-content"]/main/article/header/div/h1'
 XPATH_ACM_CITA_BTN = '//*[@id="skip-to-main-content"]/main/article/header/div/div[7]/div[2]/div[3]/button'
 XPATH_ACM_AUTORES = '//span[@property="author" and @typeof="Person"]'
 XPATH_ACM_ANIO = '//*[@id="skip-to-main-content"]/main/article/header/div/div[5]//span[@class="core-date-published"]'
-#XPATH_ACM_CITA_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/div[2]'
-#XPATH_ACM_CITA_BIBTEX_BTN = '/html/body/ngb-modal-window/div/div/div/div[2]/nav/div[2]/a'
-#XPATH_ACM_CITA_BIBTEX_TXT = '/html/body/ngb-modal-window/div/div/div/div[3]/pre'
-#XPATH_ACM_MODAL_CLOSE = '/html/body/ngb-modal-window/div/div/div/div[3]/button/i'
 XPATH_ACM_LOCATION = '//div[contains(@class, "doc-abstract-conferenceLoc")]'
 
 #funciones:

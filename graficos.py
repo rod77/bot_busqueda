@@ -66,21 +66,31 @@ def escribir_tabla(ws_destino, conteo, total, fila_inicio, titulo_col1):
     return fila_total
 
 
-def agregar_grafico(ws_destino, fila_inicio, filas_datos, titulo, celda):
+def agregar_grafico(ws_destino, fila_inicio, filas_datos, titulo, celda, mostrar_leyenda):
     chart = BarChart()
     chart.title = titulo
-    chart.y_axis.title = "Cantidad"
-    chart.x_axis.title = ws_destino.cell(row=fila_inicio, column=1).value
+    print(titulo)
+    print(mostrar_leyenda)
+    chart.y_axis.delete = False
+    if not mostrar_leyenda:
+        print("x_axis")
+        chart.x_axis.delete = False
 
     data = Reference(ws_destino, min_col=2, min_row=fila_inicio,
-                     max_row=fila_inicio+filas_datos)
-    cats = Reference(ws_destino, min_col=1, min_row=fila_inicio+1,
-                     max_row=fila_inicio+filas_datos)
+                     max_row=fila_inicio + filas_datos)
+    cats = Reference(ws_destino, min_col=1, min_row=fila_inicio + 1,
+                     max_row=fila_inicio + filas_datos)
 
     chart.add_data(data, titles_from_data=True)
     chart.set_categories(cats)
 
+    if not mostrar_leyenda:
+        print("leyenda")
+        chart.legend = None  
+    
+
     ws_destino.add_chart(chart, celda)
+
 
 
 def generar_tabla_y_grafico(path_excel: Path):
@@ -102,7 +112,7 @@ def generar_tabla_y_grafico(path_excel: Path):
     fila_fin_anios = escribir_tabla(ws_graficos, conteo_anios, total_anios,
                                     fila_inicio=fila_actual, titulo_col1="Año")
     agregar_grafico(ws_graficos, fila_actual, len(conteo_anios),
-                    "Cantidad de artículos por Año", "E2")
+                    "Cantidad de artículos por Año", "E2",False)
 
     # === PAISES ===
     fila_actual = fila_fin_anios + 20  # más espacio entre tablas
@@ -114,10 +124,48 @@ def generar_tabla_y_grafico(path_excel: Path):
     conteo_paises = Counter(paises)
     conteo_paises = dict(sorted(conteo_paises.items(), key=lambda x: x[1], reverse=True))
 
-    fila_fin_paises = escribir_tabla(ws_graficos, conteo_paises, total_paises,
-                                     fila_inicio=fila_actual, titulo_col1="País")
+    fila_fin_paises = escribir_tabla(ws_graficos, conteo_paises, total_paises,fila_inicio=fila_actual, titulo_col1="País")
     agregar_grafico(ws_graficos, fila_actual, len(conteo_paises),
-                    "Cantidad de artículos por País", f"E{fila_actual}")
+                    "Cantidad de artículos por País", f"E{fila_actual}",False)
+
+    # === ARTÍCULOS POR FUENTES ===
+    fila_actual = fila_fin_paises + 20  # más espacio entre tablas
+    escribir_titulo(ws_graficos, fila_actual, "ARTÍCULOS POR FUENTES")
+    fila_actual += 1
+
+    fuentes = obtener_valores(we_resumen, fila=7)
+    total_fuentes = len(fuentes)
+    conteo_fuentes = Counter(fuentes)
+    conteo_fuentes = dict(sorted(conteo_fuentes.items(), key=lambda x: x[1], reverse=True))
+
+    fila_fin_fuentes = escribir_tabla(ws_graficos, conteo_fuentes, total_fuentes,fila_inicio=fila_actual, titulo_col1="Fuente")
+    agregar_grafico(ws_graficos, fila_actual, len(conteo_fuentes),
+                    "Cantidad de artículos por Fuentes", f"E{fila_actual}",False)    
+    
+    # === KEYWORDS MÁS USADAS (TOP 5) ===
+    fila_actual = fila_fin_fuentes + 20  # espacio desde el gráfico anterior
+    escribir_titulo(ws_graficos, fila_actual, "TOP 5 KEYWORDS MÁS USADAS")
+    fila_actual += 1
+
+    # Obtener valores de fila 11 (keywords), separados por coma
+    keywords_raw = obtener_valores(we_resumen, fila=11)
+
+    # Dividir y limpiar cada keyword
+    lista_keywords = []
+    for celda in keywords_raw:
+        if celda:  # evitar celdas vacías
+            celda = celda.replace(";", ",")
+            palabras = [k.strip().lower() for k in celda.split(",") if k.strip()]
+            lista_keywords.extend(palabras)
+
+    # Contar y ordenar
+    conteo_keywords = Counter(lista_keywords)
+    top5_keywords = dict(conteo_keywords.most_common(5))
+
+    # Escribir tabla y gráfico
+    fila_fin_keywords = escribir_tabla(ws_graficos, top5_keywords, total=len(top5_keywords), fila_inicio=fila_actual, titulo_col1="Keyword")
+    agregar_grafico(ws_graficos, fila_actual, len(top5_keywords), "Top 5 Keywords más usadas", f"E{fila_actual}",True)
+
 
     wb.save(path_excel)
     print(f"->Graficos generados")
