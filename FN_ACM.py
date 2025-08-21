@@ -31,7 +31,7 @@ def obtener_titulo_acm(driver, url):
     titulo_elem = wait.until(
         EC.presence_of_element_located((By.XPATH, XPATH_ACM_TITLE))
     )
-    print("-->Title ACM:",titulo_elem.text)
+    #print("-->Title ACM:",titulo_elem.text)
     return titulo_elem.text.strip()
 
 
@@ -63,7 +63,7 @@ def obtener_anio_acm(driver):
         fecha_elem = wait.until(EC.presence_of_element_located((By.XPATH, XPATH_ACM_ANIO)))
         fecha_texto = fecha_elem.text.strip()
 
-        print("--> Fecha publicada:", fecha_texto)  # Ej: "08 November 2020"
+        #print("--> Fecha publicada:", fecha_texto)  # Ej: "08 November 2020"
 
         # Extraer el último token como año
         anio = int(fecha_texto.strip().split()[-1])
@@ -100,7 +100,7 @@ def obtener_booktitle_acm(driver):
                 if h4.text.strip().lower() == "conference":
                     booktitle_tag = seccion.find_element(By.XPATH, './/div[contains(@class,"core-conference-right")]/a')
                     texto_conferencia = booktitle_tag.text.strip()
-                    print("--> Booktitle (conferencia):", texto_conferencia)
+                    #print("--> Booktitle (conferencia):", texto_conferencia)
                     return texto_conferencia
             except Exception:
                 continue
@@ -141,7 +141,7 @@ def obtener_keyword_acm(driver):
                         key_tags = seccion.find_elements(By.XPATH, './/ol/li/a')
                         keywords = [k.text.strip() for k in key_tags if k.text.strip()]
                         texto_keywords = ", ".join(keywords)
-                        print("--> KeyWords ", texto_keywords)
+                        #print("--> KeyWords ", texto_keywords)
                         return texto_keywords
                 except Exception:
                     continue
@@ -161,7 +161,7 @@ def obtener_doi_acm(driver):
         )
         href = doi_link.get_attribute("href")
         doi = href.replace("https://doi.org/", "").strip()
-        print("--> DOI:", doi)
+        #print("--> DOI:", doi)
         return doi
     except Exception as e:
         print(f"[ERROR] No se pudo obtener el DOI: {e}")
@@ -223,7 +223,7 @@ def obtener_location_acm(driver):
                         country = texto_country.split(",")[-1].strip()
                     else:
                         country = texto_country
-                    print("--> Country:", country)
+                    #print("--> Country:", country)
                     return country
             except Exception:
                 continue
@@ -263,8 +263,8 @@ def obtener_metricas_acm(driver):
             except:
                 continue
 
-        print("--> Citas (citations):", cites_in)
-        print("--> Descargas (downloads):", text_views)
+        #print("--> Citas (citations):", cites_in)
+        #print("--> Descargas (downloads):", text_views)
 
         return cites_in, text_views
 

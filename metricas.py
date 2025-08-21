@@ -112,7 +112,7 @@ def generar_metricas(path_excel: Path):
     ws_metrica.cell(row=fila, column=2).number_format = '0.00%'
 
     wb.save(path_excel)
-    print("→ Métricas generadas correctamente.")
+    print("--> Métricas generadas correctamente.")
 
 
 if __name__ == "__main__":

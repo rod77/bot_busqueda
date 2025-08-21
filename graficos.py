@@ -69,11 +69,11 @@ def escribir_tabla(ws_destino, conteo, total, fila_inicio, titulo_col1):
 def agregar_grafico(ws_destino, fila_inicio, filas_datos, titulo, celda, mostrar_leyenda):
     chart = BarChart()
     chart.title = titulo
-    print(titulo)
-    print(mostrar_leyenda)
+    #print(titulo)
+    #print(mostrar_leyenda)
     chart.y_axis.delete = False
     if not mostrar_leyenda:
-        print("x_axis")
+        ##print("x_axis")
         chart.x_axis.delete = False
 
     data = Reference(ws_destino, min_col=2, min_row=fila_inicio,
@@ -85,7 +85,7 @@ def agregar_grafico(ws_destino, fila_inicio, filas_datos, titulo, celda, mostrar
     chart.set_categories(cats)
 
     if not mostrar_leyenda:
-        print("leyenda")
+        #print("leyenda")
         chart.legend = None  
     
 
@@ -168,7 +168,7 @@ def generar_tabla_y_grafico(path_excel: Path):
 
 
     wb.save(path_excel)
-    print(f"->Graficos generados")
+    print(f"-->Graficos generados")
 
 
 if __name__ == "__main__":

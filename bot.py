@@ -11,7 +11,8 @@ import shutil
 from FN_IEEE import obtener_titulo_ieee, obtener_location_ieee, obtener_metricas_ieee, obtener_cita_ieee
 from FN_SPRINGER import obtener_titulo_springer, obtener_location_springer, obtener_metricas_springer, obtener_cita_springer
 from FN_ACM import obtener_titulo_acm, obtener_location_acm, obtener_metricas_acm, obtener_cita_acm
-
+from graficos import generar_tabla_y_grafico
+from metricas import generar_metricas
 #
 ORIGINAL_XLSX = Path("ExcelModelo/ExcelModelo.xlsx")
 COPIA_XLSX = Path("Resumen.xlsx")
@@ -134,8 +135,11 @@ if __name__ == "__main__":
             continue
         driver = inicializar_driver()
         titulo = extractor["titulo"](driver, url)
+        if(fuente!='ACM'):
+            ubicacion = extractor["ubicacion"](driver)
         datos_cita = extractor["cita"](driver)        
-        ubicacion = extractor["ubicacion"](driver)
+        if(fuente=='ACM'):
+            ubicacion = extractor["ubicacion"](driver)
         cites_in, text_views = extractor["metricas"](driver)
 
         col_libre = encontrar_columna_libre(ws)
@@ -162,4 +166,6 @@ if __name__ == "__main__":
         driver.execute_script("window.sessionStorage.clear();")
         driver.quit()        
     #driver.quit()
+    generar_tabla_y_grafico(Path("Resumen.xlsx"))
+    generar_metricas(Path("Resumen.xlsx"))
     print("Proceso Finalizado.")
