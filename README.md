@@ -38,8 +38,7 @@ El resultado es un archivo Excel (Resumen.xlsx) con todos los datos obtenidos, g
 
 ---
 
-## 📦 Instalación desde código fuente (opcional para desarrolladores)
-
+## 📦 Instalación desde código fuente
 ```bash
 git clone https://github.com/rod77/bot_busqueda.git
 cd bot_busqueda
