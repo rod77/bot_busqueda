@@ -58,8 +58,8 @@ python bot.py
 - Brinda métricas objetivas de calidad
 
 ---
-
-## 🧠 Créditos
-Desarrollado por Ing. Rodrigo Maestre – **UTN**.  
-Trabajo Final – Seminario: Herramientas para el desarrollo de tesis.  
-Maestría en Ingeniería de Sistemas de Información.
+<p align="right">
+Desarrollado por <b>Ing. Rodrigo Maestre – UTN.</b> <br/> 
+Trabajo Final – Seminario: Herramientas para el desarrollo de tesis.  <br/> 
+Maestría en Ingeniería de Sistemas de Información.<br/> 
+</p>
